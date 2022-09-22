@@ -1,6 +1,7 @@
 #!/bin/bash
 
 BACKUP_DIR="/home/inventree/backup"
+MEDIA_DIR="/home/inventree/data/media"
 BACKUP_FILE="$BACKUP_DIR/data.json"
 
 echo "Initializing backup repo"
@@ -16,9 +17,15 @@ while true; do
     echo "running backup"
     dt=$(date '+%d/%m/%Y %H:%M:%S')
     # Delete file first otherwise export-records will hang
+    echo "Exporting database records"
     rm -f "$BACKUP_FILE"
     invoke export-records -f "$BACKUP_FILE"
+    echo "Copying media folder"
+    cp -r "$MEDIA_DIR" .
+    echo "Committing"
     git add "$BACKUP_FILE"
+    git add "$(basename $MEDIA_DIR)"
     git commit -m "backup: create backup at ${dt}"
-    sleep 30
+    echo "Backup complete"
+    sleep 60
 done
